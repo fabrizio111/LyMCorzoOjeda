@@ -1,7 +1,7 @@
 # Este es el alfabeto que contiene los elementos terminales del lenguaje
 alfabeto = ["var", "PROC", "drop", "free", "walk","canWalk", "fi", "go", "GORP","do", "walk", "od", "(", ")", "{", "}", ",", ".", ";", "north", "south", "east", "west", "right", "left", "front", "back", "jump", "jumpTo", "veer", "look", "grab", "get", "pop", "if", "else", "around"]
 #El conjunto de elementos no terminales del lenguaje
-metodos=["drop", "walk", "jump", "jumpTo", "veer", "look", "grab", "get", "free", "pop", "PROC", "do", "go",  "if", "while", "repeatTimes"]
+metodos=["drop", "walk", "walk_d","walk_o","jump", "jumpTo", "veer", "look", "grab", "get", "free", "pop", "PROC", "do", "go",  "if_condicional", "loop", "repeat"]
 condiciones =["isfacing", "isValid", "canWalk", "not"]
 numeros = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 letras = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
@@ -10,119 +10,78 @@ letras = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
 metodosnoconocidos=[]
 variables=[]
 parametros=[]
-walk=["north", "south", "east", "west","right", "left", "front", "back"]
+walkc=["north", "south", "east", "west","right", "left", "front", "back"]
 puntos_cardinales=["north", "south", "east", "west"]
+direccion=["right", "left", "front", "back"]
 veer_to=["right", "left","around"]
 objetos=['balloons','chips']
 
 
-#Analizador
-def Parser()->bool:
-    ruta = input("\nIngrese la ruta del archivo: ")
-    archivo = open(ruta, "r")
-    retorno = True
-    lineas = archivo.read().replace("\n", " ")
-    archivo.close()
-    lineas.strip()
-    retorno = recorrer(lineas)
-    if(retorno==True):
-      print("\nEl programa está escrito sintácticamente correcto.\n")
+
+
+#Método para identificar una palabra del lenguaje y llamar a la funcion de verificacion.
+
+def call_method(name:str, number:int)->tuple:
+    number2=0
+    if name == "drop":
+        number2=drop(number)
+    elif name == "=":
+        number2=assignment(number)
+    elif name == 'walk':
+        number2=walk(number)
+    elif name == "walkm":
+        number2=walk_d(number)    
+    elif name == "jump":
+        number2=jump(number)
+    elif name == "veer":
+        number2=veer(number)
+    elif name == "look":
+        number2=look(number)
+    elif name == "grab":
+        number2=grab(number)
+    elif name == "get":
+        number2=get(number)
+    elif name == "free":
+        number2=free(number)      
+    elif name == "pop":
+        number2=(number)
+    elif name == "isfacing":
+        number=isfacing(number)
+    elif name == "isValid":
+        number2=isValid(number)
+    elif name == "canWalk":
+        number2=canwalkmultiple(number)
+    elif name == "not":
+        number2=c_not(number)
+    elif name ==' if_condicional':
+        number2=if_condicional(number)
+    elif name == "loop":
+        number2=loop(number)
+    elif name == "repeat":
+        number2=repeat(number)
     else:
-      print("\nEl programa está escrito sintácticamente incorrecto.\n")
-  
-
-#Method used to go over the whole .txt file in String form, calling the methods that verify sintax.
-def recorrer(lineas:str)->bool:
-  palabra = ""
-  indice=0
-  indice2=0
-  retorno=True
-
-  if lineas[0]=="P" and lineas[1]=="R" and lineas[2]=="O" and lineas[3]=="G":  
-    if lineas[-1]=="P" and lineas[-2]=="R" and lineas[-3]=="O" and lineas[-4]=="G":
-        retorno=True
-    else:
-        retorno=False
-  else:
-      retorno=False
-
-  indice =4    
-  while indice2< len(lineas)-5: 
-    palabra+=lineas[indice2]
-    if lineas[indice2+1]==",":
-      variables.append(palabra)
-      palabra=""
-      indice2+=1
-    elif lineas[indice2-1]=="," and lineas[indice2+1]==";":
-      variables.append(palabra2)
-      palabra2=""     
-    indice2+=1  
-    diferencia=indice2-indice
-    indice+=diferencia
-    indice+=1
-  return retorno
-
-#Method used to determine which reserved word is identified and call the corresponding verifier.
-def call_method(palabra:str, indice:int, lineas:str)->tuple:
-    tuplaverdadindice=(False, 0)
-    if palabra == "drop":
-        tuplaverdadindice=drop(lineas, indice)
-    elif palabra == "=":
-        tuplaverdadindice=assignment(lineas, indice)
-    elif palabra == "walkm":
-        tuplaverdadindice=compararwalkmultiple(lineas, indice)    
-    elif palabra == "jump":
-        tuplaverdadindice=compararjump(lineas, indice)
-    elif palabra == "jumpTo":
-        tuplaverdadindice=compararjumpTo(lineas, indice) 
-    elif palabra == "veer":
-        tuplaverdadindice=veer(lineas, indice)
-    elif palabra == "look":
-        tuplaverdadindice=look(lineas, indice)
-    elif palabra == "grab":
-        tuplaverdadindice=grab(lineas, indice)
-    elif palabra == "get":
-        tuplaverdadindice=get(lineas, indice)
-    elif palabra == "free":
-        tuplaverdadindice=free(lineas, indice)      
-    elif palabra == "pop":
-        tuplaverdadindice=compararpop(lineas, indice)
-    elif palabra == "isfacing":
-        tuplaverdadindice=compararisfacing(lineas, indice)
-    elif palabra == "isValid":
-        tuplaverdadindice=compararisValid(lineas, indice)
-    elif palabra == "canWalk":
-        tuplaverdadindice=compararcanwalkmultiple(lineas, indice)
-    elif palabra == "not":
-        tuplaverdadindice=compararnot(lineas, indice)
-    elif palabra == "while":
-        tuplaverdadindice=compararwhile(lineas, indice)
-    elif palabra == "repeatTimes":
-        tuplaverdadindice=compararrepeatTimes(lineas, indice)
-    else:
-        tuplelist = list(tuplaverdadindice)
-        tuplelist[0]=False
-        tuplaverdadindice = tuple(tuplelist)
-    return tuplaverdadindice
+        number2 = 0
+    return number2
 
 #Funcion para saber cual condicional se va a usar y verificar si está sintacticamente correcto.
 def compararcondicionales(name:str, number:int):
     number2=0
     if  name == "isfacing":
-        number2=compararisfacing(number)
+        number2=isfacing(number)
     elif name == "isValid":
-        number2=compararisValid(number)
+        number2=isValid(number)
     elif name == "canWalk":
-        number2=compararcanwalkmultiple(number)
+        number2=canwalkmultiple(number)
     elif name == "not":
-        number2=compararnot(number)
+        number2=c_not(number)
     else:
         number2 = 0 
 
     return number2
 
-#Methods used to individually asses the the sintax of every declared method in the .txt file.
+#COMANDOS
 
+#'='
 def assignment(name,number):
         result=0
         verificar=[]
@@ -147,27 +106,22 @@ def assignment(name,number):
 
                 if len(verificar) == 4:
                         if verificar[-1] == forma[-1]:
-                                for numero in numeros:
-                                        if numero in verificar[2]:
-                                                result=1
+                          encontrado = False
+                          numero = 0 
+                          while encontrado == False and numero <= len(numeros): 
+
+                               if numeros[numero] in verificar[2]:
+                                 encontrado = True
+                                 result = 1
+                               numero += 1
+                           
 
         return result
 
-def compararwalkmultiple(lineas:str, indice:int)->tuple:
-  bool = False
-  if indice+3 == ")":#se podria mirar
-    tuplasimple = compararwalksimple(lineas, indice)
-  else:
-    tuplacompuesta = compararwalkcompuesto(lineas, indice)
-  if tuplasimple[0]==False or tuplacompuesta[0]==False:
-    bool=False
-  indicefinal =indice
-  tupla= (True,indicefinal)
-  return tupla
 
 #walk
 
-def compararwalksimple(name, number):
+def walk(name, number):
 
     result= 0
     verificar = []
@@ -209,106 +163,125 @@ def compararwalksimple(name, number):
 
     return result
 
-"""
+#walk_d
+def walk_d(name, number):
 
-def compararwalksimple(lineas, indice)->tuple:
-  indice2= indice
-  sintaxis = False
-  palabra =""
-  indice3 = indice2+1
-  if lineas[indice2+1]=="(":
-    while indice3 <= indice3+2:
-      for indicevar in variables:
-        for indicepar in parametros:
-          palabra+=lineas[indice3]
-          if palabra == indicepar or palabra == indicevar or palabra.isdigit() == True:
-            longitudactual = lineas[indice3+len(palabra)]
-            if lineas[len(longitudactual)+1]==")":
-                sintaxis = True
-      indice3+=1
-  longitud = len(longitudactual+1)
-  tupla = (longitud,sintaxis)
-  return tupla
+    result = 0
+    verificar = []
+    forma = ['walk_d', numeros, ':', direccion, ')']
+    resto = len(name) - (number + 1)
 
-"""
-def compararwalkcompuesto(lineas, indice)->tuple:
-  indice2= indice
-  sintaxis = False
-  palabra =""
-  palabra2=""
-  indice3 = indice2+1
-  if lineas[indice2+1]=="(":
-    while indice3 <= indice3+5 :
-      for indicewalk in walk:
-        palabra+=lineas[indice3]
-        if palabra == indicewalk:
-          longitudactual = lineas[indice3+len(palabra)]
-          if lineas[len(longitudactual)+1]==",":
-            longitudactual_2+=1
-            while longitudactual_2<=longitudactual+1:
-              palabra2+=lineas[longitudactual]
-              for indicevar in variables:
-                for indicepar in parametros:
-                  if palabra2 == indicepar or palabra2 == indicevar or palabra2.isdigit() == True:
-                    longitudactual3 = lineas[longitudactual+len(palabra2)]
-                    if lineas[len(longitudactual3)+1]==")":
-                      sintaxis = True
-              longitudactual_2+=1          
-      indice3+=1
-  longitud = len(longitudactual3+1)
-  tupla =(longitud,sintaxis)
-  return tupla
+    if resto >= 4:
+        verificar.append('walk_d')
+        contador=1
+        while contador <= 5:
+            sub_number = number + contador
+            posicion = name[sub_number]
+            verificar.append(posicion)
+            contador +=1
 
-def compararjump(lineas:str, indice:int)->tuple:
-  indice2= indice
-  sintaxis = False
-  palabra =""
-  indice3 = indice2+1
-  if lineas[indice2+1]=="(":
-    while indice3 <= indice3+2 :
-      for indicevar in variables:
-        for indicepar in parametros:
-          palabra+=lineas[indice3]
-          if palabra == indicepar or palabra == indicevar or palabra.isdigit() == True:
-            longitudactual = lineas[indice3+len(palabra)]
-            if lineas[len(longitudactual)+1]==")":
-              sintaxis = True
-      indice3+=1
-  longitud = len(longitudactual+1)
-  tupla =(longitud,sintaxis)
-  return tupla
+        if len(verificar) == 5:
+            if verificar[2] == forma[2]:
+                if verificar[-1] == forma[-1]:
+                     encontrado= False
+                     numero = 0
+                   
+                     while encontrado == False and numero <= len(numeros): 
 
-def compararjumpTo(lineas:str, indice:int)->tuple:
-  indice2= indice
-  sintaxis = False
-  palabra =""
-  indice3 = indice2+1
-  longitudactual=0
-  indice4=0
-  palabra2=""
-  if lineas[indice2+1]=="(":
-    while indice3 <= indice3+2 :
-      for indicevar in variables:
-        for indicepar in parametros:
-          palabra+=lineas[indice3]
-          if palabra == indicepar or palabra == indicevar or palabra.isdigit() == True:
-            longitudactual = lineas[indice3+len(palabra)]
-      indice3+=1
-  if longitudactual!=0:          
-    if lineas[len(longitudactual)+1]==",":
-      indice4=longitudactual+1
-      while indice4<= indice4+2 :
-        for indicevar in variables:
-          for indicepar in parametros:
-            palabra2+=lineas[indice4]
-            if palabra == indicepar or palabra == indicevar or palabra.isdigit() == True:
-              longitudactual = lineas[indice4+len(palabra2)]   
-              sintaxis = True
-        indice4+=1
-  longitud = len(longitudactual+1)
-  tupla =(longitud,sintaxis)
-  return tupla
+                      if numeros[numero] in verificar[1]:
+                        elemento = 0
+                        while encontrado == False and elemento <= len(direccion): 
+                                if verificar[3] == direccion[elemento]:
+                                    result = 1
+                                    encontrado = True 
+                                elemento +=1
+                      numero += 1
+            
 
+    return result
+
+#walk_o
+def walk_o(name, number):
+
+    result = 0
+    verificar = []
+    forma = ['walk_o', numeros, ':', direccion, ')']
+    resto = len(name) - (number + 1)
+
+    if resto >= 4:
+        verificar.append('walk_o')
+        contador=1
+        while contador <= 5:
+            sub_number = number + contador
+            posicion = name[sub_number]
+            verificar.append(posicion)
+            contador +=1
+
+        if len(verificar) == 5:
+            if verificar[2] == forma[2]:
+                if verificar[-1] == forma[-1]:
+                     encontrado= False
+                     numero = 0
+                   
+                     while encontrado == False and numero <= len(numeros): 
+
+                      if numeros[numero] in verificar[1]:
+                        elemento = 0
+                        while encontrado == False and elemento <= len(direccion): 
+                                if verificar[3] == direccion[elemento]:
+                                    result = 1
+                                    encontrado = True 
+                                elemento +=1
+                      numero += 1
+            
+
+    return result
+
+#jump
+def jump(name, number):
+
+    result= 0
+    verificar = []
+    forma = []
+    resto = len(name) - (number + 1)
+
+    if resto >= 2:
+        
+        verificar.append('jump')
+        forma.append('jump', numeros, ')')
+        contador=1
+        while contador <= 3:
+
+            sub_number = number + contador
+            posicion = name[sub_number]
+            verificar.append(posicion)
+            contador += 1
+
+        if len(verificar) == 3:
+            if verificar[-1] == forma[-1]:
+                encontrado_numero= False
+                encontrado_letra=False
+                numero = 0
+                letra = 0
+                while encontrado_numero == False and numero <= len(numeros): 
+
+                    if numeros[numero] in verificar[1]:
+                        encontrado_numero = True
+                        result = 1
+                    numero += 1
+                        
+                while encontrado_letra == False and letra <= len(letras): 
+
+                    if letras[letra] in verificar[1]:
+                        encontrado_letra = True
+                        result = 1
+                    letra += 1 
+                        
+
+    return result
+
+
+#veer
 def veer(name, number):
 
     result = 0
@@ -341,40 +314,7 @@ def veer(name, number):
 
     return result
 
-"""
-por si no sirve el de arriba
-#veer
-def compararveer(name, number):
-
-    result = 0
-    verificar = []
-    forma = []
-    resto = len(name) - (number + 1)
-
-    if resto >= 3:
-
-        verificar.append('veer')
-        forma.append('veer', numeros, ')')
-        contador=1
-        while contador <= 4:
-            sub_number = number + contador
-            posicion = name[sub_number]
-            verificar.append(posicion)
-            contador +=1
-
-        if len(verificar) == 4:
-            if verificar[1] == forma[1]:
-                if verificar[3] == forma[3]:
-                    encontrado_veer= False
-                    veer= 0
-                    while encontrado_veer == True: 
-
-                        if veer in verificar[1]:
-                            encontrado_veer = True
-                            result = 1
-
-    return result
-"""
+#look
 def look(name, number):
 
     result = 0
@@ -445,27 +385,7 @@ def grab(name, number):
 
     return result
 
-"""
-por si no sale bien el de arriba
-def comparargrab(lineas:str, indice:int)->tuple:
-  indice2= indice
-  sintaxis = False
-  palabra =""
-  indice3 = indice2+1
-  if lineas[indice2+1]=="(":
-    while indice3 <= indice3+2 :
-      for indicevar in variables:
-        for indicepar in parametros:
-          palabra+=lineas[indice3]
-          if palabra == indicepar or palabra == indicevar or palabra.isdigit() == True:
-            longitudactual = lineas[indice3+len(palabra)]
-            if lineas[len(longitudactual)+1]==")":
-              sintaxis = True
-      indice3+=1
-  longitud = len(longitudactual+1)
-  tupla =(longitud,sintaxis)
-  return tupla
-"""
+
 #get
 def get(name, number):
 
@@ -504,27 +424,7 @@ def get(name, number):
 
     return result
 
-"""
-ppor si no sale bien el de arriba
-def compararget(lineas:str, indice:int)->tuple:
-  indice2= indice
-  sintaxis = False
-  palabra =""
-  indice3 = indice2+1
-  if lineas[indice2+1]=="(":
-    while indice3 <= indice3+2 :
-      for indicevar in variables:
-        for indicepar in parametros:
-          palabra+=lineas[indice3]
-          if palabra == indicepar or palabra == indicevar or palabra.isdigit()==True:
-            longitudactual = lineas[indice3+len(palabra)]
-            if lineas[len(longitudactual)+1]==")":
-              sintaxis = True
-      indice3+=1
-  longitud = len(longitudactual+1)
-  tupla =(longitud,sintaxis)
-  return tupla
-"""
+
 #drop
 def drop(name, number):
 
@@ -589,71 +489,28 @@ def free(name, number):
 
     return result
 
-"""
-por si no sale el de arriba
-
-def compararfree(lineas:str, indice:int)->tuple:
-  indice2= indice
-  sintaxis = False
-  palabra =""
-  indice3 = indice2+1
-  if lineas[indice2+1]=="(":
-    while indice3 <= indice3+2 :
-      for indicevar in variables:
-        for indicepar in parametros:
-          palabra+=lineas[indice3]
-          if palabra == indicepar or palabra == indicevar or palabra.isdigit() ==True:
-            longitudactual = lineas[indice3+len(palabra)]
-            if lineas[len(longitudactual)+1]==")":
-              sintaxis = True
-      indice3+=1
-  longitud = len(longitudactual+1)
-  tupla =(longitud,sintaxis)
-  return tupla
-"""
-
-def compararpop(lineas:str, indice:int)->tuple:
-  indice2 = indice
-  sintaxis = False
-  palabra = ""
-  indice3 = indice2+1
-  if lineas[indice2+1]=="(":
-    while indice3 <= indice3+2 :
-      for indicevar in variables:
-        for indicepar in parametros:
-          palabra+=lineas[indice3]
-          if palabra == indicepar or palabra == indicevar or palabra.isdigit() == True:
-            longitudactual = lineas[indice3+len(palabra)]
-            if lineas[len(longitudactual)+1]==")":
-              sintaxis = True
-      indice3+=1
-  longitud = len(longitudactual+1)
-  tupla =(longitud,sintaxis)
-  return tupla
-
 #Condicionales
-def compararisfacing(lineas:str, indice:int)->tuple:
-  indice2= indice
+def isfacing(name,number):
   sintaxis = False
   palabra =""
-  indice3 = indice2+1
-  if lineas[indice2+1]=="(":
+  indice3 = number+1
+  if name[number+1]=="(":
     while indice3 <= indice3+5 :
       for indiceface in facing:
-        palabra+=lineas[indice3]
+        palabra+=name[indice3]
         if palabra == indiceface:
-          longitudactual = lineas[indice3+len(palabra)]
-          if lineas[len(longitudactual)+1]==")":
+          longitudactual = number[indice3+len(palabra)]
+          if name[len(longitudactual)+1]==")":
             sintaxis = True
       indice3+=1
   longitud = len(longitudactual+1)
   tupla =(longitud,sintaxis)
   return tupla
 
-def compararisValid(lineas:str, indice:int)->tuple:
+def isValid(lineas:str, indice:int):
   pass
 
-def compararcanwalkmultiple(lineas:str, indice:int)->tuple:
+def canwalkmultiple(lineas:str, indice:int):
   indice2= indice
   sintaxis = False
   palabra =""
@@ -681,66 +538,206 @@ def compararcanwalkmultiple(lineas:str, indice:int)->tuple:
   tupla =(longitud,sintaxis)
   return tupla
 
-def compararnot(lineas:str, indice:int)->tuple:
-  if lineas[indice+1] == "(":
+def c_not(name,number):
+  if name[number+1] == "(":
     pass
   pass
 
-def compararif(lineas:str, indice:int)->tuple:
-  pass
+def verificacion(verificar,lista):
+    
+    contador = 0
+    while contador < len(verificar):
+    
+        if verificar[contador] == '=':
+            retorno = assignment(verificar, contador)
+            lista.append(retorno)
+        elif verificar[contador] == 'walk':
+            retorno = walk(verificar, contador)
+            lista.append(retorno)
+        elif verificar[contador] == 'jump':
+            retorno = jump(verificar, contador)
+            lista.append(retorno)
+            """
+        elif verificar[contador] == 'jumpTo':
+            retorno = jumpTo(verificar, contador)
+            lista.append(retorno)
+            """
+        elif verificar[contador] == 'veer':
+            retorno = veer(verificar, contador)
+            lista.append(retorno)
+        elif verificar[contador] == 'look':
+            retorno = look(verificar, contador)
+            lista.append(retorno)
+        elif verificar[contador] == 'drop':
+            retorno = drop(verificar, contador)
+            lista.append(retorno)
+        elif verificar[contador] == 'grab':
+            retorno = grab(verificar, contador)
+            lista.append(retorno)
+        elif verificar[contador] == 'get':
+            retorno = get(verificar, contador)
+            lista.append(retorno)
+        elif verificar[contador] == 'free':
+            retorno = free(verificar, contador)
+            lista.append(retorno)
+            """
+        elif verificar[contador] == 'pop':
+            retorno = pop(verificar, contador)
+            lista.append(retorno)
+            """
+        elif verificar[contador] == 'walk_d':
+            retorno = walk_d(verificar, contador)
+            lista.append(retorno)
+        elif verificar[contador] == 'walk_o':
+            retorno = 'walk_o'(verificar, contador)
+            lista.append(retorno)
+     
 
-def compararwhile(lineas:str, indice:int)->tuple:
-  sintaxis = False
-  flag = False
-  longitudcondicional=9
-  palabra=""
-  if lineas[indice+1]=="(":
-    indice+=1
-    while indice <= indice+9 and not flag:
-      palabra+=lineas[indice]
-      if(palabra in condiciones):
-        flag = True
-        sintaxis = compararcondicionales(palabra, indice, lineas)
-      indice+=1
-  else:
-    sintaxis = False
+        contador += 1
+    return lista
+    
+def if_condicional(name, number):
 
-def compararrepeatTimes(lineas:str, indice:int)->tuple:
-  pass
+    result = 0
+    verificar = ['if']
+    lista = []
+    contar = 0
+    parentesis_izq = 1
+    parentesis_der = 0
+    sub_number = number
 
-#Lines of code which call upon the main method and start the parser method as a whole.
-print("\n---Welcome to the Java Program Parser---")
-Parser()
+    while (parentesis_izq != parentesis_der):
+        sub_number += 1
+        if sub_number < len(name):
+            ins = name[sub_number]
+            verificar.append(ins)
+            if ins == '(':
+                parentesis_izq += 1
+            elif ins == ')':
+                parentesis_der += 1
+        else:
+            parentesis_der += 1
+    lista_f=verificacion(verificar,lista)
+    for element in lista_f:
+        contar += element
+
+    if contar == len(lista_f):
+        result = 1
+
+    return result
+
+    
+def loop(name, number):
+    result = 0
+    verificar = ['loop']
+    lista = []
+    cont = 0
+
+    parentesis_izq = 1
+    parentesis_der = 0
+    sub_number = number
+
+#Mientras los parentesis sean diferentes se va aumentando el indice(number)
+    while (parentesis_izq != parentesis_der):
+        sub_number += 1
+        if sub_number < len(name):
+            instruccion = name[sub_number]
+            verificar.append(instruccion)
+            if instruccion == '(':
+                parentesis_izq += 1
+            elif instruccion == ')':
+                parentesis_der += 1
+        else:
+            parentesis_der += 1
+    lista_f=verificacion(verificar,lista)
+    for element in lista_f:
+        cont += element
+
+    if cont == len(lista_f):
+        result = 1
+
+    return result
 
 
+def repeat(name, number):
+    result = 0
+    verificar = ['repeat']
+    lista = []
+    cont = 0
+
+    parentesis_izq = 1
+    parentesis_der = 0
+    sub_number = number
+
+#Mientras los parentesis sean diferentes se va aumentando el indice(number)
+    while (parentesis_izq != parentesis_der):
+        sub_number += 1
+        if sub_number < len(name):
+            instruccion = name[sub_number]
+            verificar.append(instruccion)
+            if instruccion == '(':
+                parentesis_izq += 1
+            elif instruccion == ')':
+                parentesis_der += 1
+        else:
+            parentesis_der += 1
+    lista_f=verificacion(verificar,lista)
+    for element in lista_f:
+        cont += element
+
+    if cont == len(lista_f):
+        result = 1
+
+    return result
 
 
-#       # estructuras si no esta sacar el nombre e ir a posicion y evaluar
-#                 """ 
-#             else:
-#               noencontrado=palabra
-#               for indicea in range(len(alfabeto)):
-#                 token = cadena[indicea]
-#                 if token in noencontrado:
-#                   noencontrado=""
-#                      """     
-# """  
-# def verificador(lineas:list)->bool:
-#   for lineap in lineas:
-#     comparador(lineap)
-   
-# def comparador(lineacomparada: str)->bool:
-#   palabra=""
-#   for letra in lineacomparada:
-#     palabra+= letra
-#     if(palabra in metodos):
-#       if palabra = "if":
-#         compararif()
-# """
+#Analizador
+def Parser():
+    ruta = input("\nIngrese la ruta del archivo: ")
+    archivo = open(ruta, "r")
+    retorno = True
+    lineas = archivo.read().replace("\n", " ")
+    archivo.close()
+    lineas.strip()
+    retorno = recorrer(lineas)
+    if(retorno==True):
+      print("\nEl programa está escrito sintácticamente correcto.\n")
+    else:
+      print("\nEl programa está escrito sintácticamente incorrecto.\n")
   
-# file1 = open("Text.txt", "r")
-# print(file1.read())
 
-# file = open("Text.txt", "r")
-# for line in file:
-#   print(line)
+#Funcion para recorrer el archivo de texto y llamar a los metodos que verifican que la sintaxis esté correcta.
+def recorrer(lineas):
+
+  palabra = ""
+  enum=0
+  enum2=0
+  retorno=True
+
+  if lineas[0]=="P" and lineas[1]=="R" and lineas[2]=="O" and lineas[3]=="G":  
+    if lineas[-1]=="P" and lineas[-2]=="R" and lineas[-3]=="O" and lineas[-4]=="G":
+        retorno=True
+    else:
+        retorno=False
+  else:
+      retorno=False
+
+  enum=4    
+  while enum2< len(lineas)-5: 
+    palabra+=lineas[enum2]
+    if lineas[enum2+1]==",":
+      variables.append(palabra)
+      palabra=""
+      enum2+=1
+    elif lineas[enum2-1]=="," and lineas[enum2+1]==";":
+      variables.append(palabra2)
+      palabra2=""     
+    enum2+=1  
+    resto=enum2-enum
+    enum+=resto
+    enum+=1
+  return retorno
+
+#Donde empieza toda la magia
+print("\n********Bienvenido*******")
+Parser()
