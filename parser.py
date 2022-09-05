@@ -21,7 +21,7 @@ objetos=['balloons','chips']
 
 #Método para identificar una palabra del lenguaje y llamar a la funcion de verificacion.
 
-def call_method(name:str, number:int)->tuple:
+def call_method(name,number):
     number2=0
     if name == "drop":
         number2=drop(number)
@@ -33,6 +33,8 @@ def call_method(name:str, number:int)->tuple:
         number2=walk_d(number)    
     elif name == "jump":
         number2=jump(number)
+    elif name == 'jumpTo':
+        number2 == jumpTo(number)
     elif name == "veer":
         number2=veer(number)
     elif name == "look":
@@ -64,7 +66,7 @@ def call_method(name:str, number:int)->tuple:
     return number2
 
 #Funcion para saber cual condicional se va a usar y verificar si está sintacticamente correcto.
-def compararcondicionales(name:str, number:int):
+def compararcondicionales(name,number):
     number2=0
     if  name == "isfacing":
         number2=isfacing(number)
@@ -280,7 +282,38 @@ def jump(name, number):
 
     return result
 
+#jumpTo
+def jumpTo(name, number):
 
+    result = 0
+    verificar = []
+    forma = ['jumpTo', numeros, ':', metodos, ')']
+    resto = len(name) - (number + 1)
+
+    if resto >= 4:
+        verificar.append('jumpTo')
+        contador=1
+        while contador <= 5:
+            sub_number = number + contador
+            posicion = name[sub_number]
+            verificar.append(posicion)
+            contador +=1
+
+        if len(verificar) == 5:
+            if verificar[2] == forma[2]:
+                if verificar[-1] == forma[-1]:
+                     encontrado= False
+                
+                     elemento = 0
+                     while encontrado == False and elemento <= len(metodos): 
+                                if verificar[3] == metodos[elemento]:
+                                    result = 1
+                                    encontrado = True 
+                                elemento +=1
+                  
+            
+
+    return result
 #veer
 def veer(name, number):
 
@@ -391,19 +424,19 @@ def get(name, number):
 
     result = 0
     verificar = []
-    forma = ['grab', ':', objetos, letras, ')']
+    forma = ['get', ':', objetos, letras, ')']
     resto = len(name) - (number + 1)
 
     if resto >= 4:
-        verificar.append('grab')
+        verificar.append('get')
         contador=1
-        while contador <= 5:
+        while contador <= 4:
             sub_number = number + contador
             posicion = name[sub_number]
             verificar.append(posicion)
             contador += 1
 
-        if len(verificar) == 5:
+        if len(verificar) == 4:
             if verificar[1] == forma[1]:
                 if verificar[-1] == forma[-1]:
                   if 'chips' in verificar[2]:
@@ -488,55 +521,107 @@ def free(name, number):
                            letra += 1
 
     return result
+#pop
+
+def pop(name, number):
+
+    result = 0
+    verificar = []
+    forma = ['pop', ':', objetos, letras, ')']
+    resto = len(name) - (number + 1)
+
+    if resto >= 4:
+        verificar.append('pop')
+        contador=1
+        while contador <= 4:
+            sub_number = number + contador
+            posicion = name[sub_number]
+            verificar.append(posicion)
+            contador += 1
+
+        if len(verificar) == 4:
+            if verificar[1] == forma[1]:
+                if verificar[-1] == forma[-1]:
+                  if 'balloons' in verificar[2]:
+                    encontrado  = False 
+                    elemento = 0  
+                    letra = 0
+                    while encontrado == False and elemento <= len(objetos):
+
+                        if verificar[2] == objetos[elemento]:
+                            letra = 0
+                            while encontrado == False and letra <= len(letras):
+
+                                if letras[letra] in verificar[3]:
+                                    result = 1
+                                    encontrado == True
+                                letra += 1
+                        elemento += 1
+
+    return result
 
 #Condicionales
 def isfacing(name,number):
-  sintaxis = False
+  forma = False
   palabra =""
-  indice3 = number+1
+  number2 = number+1
   if name[number+1]=="(":
-    while indice3 <= indice3+5 :
-      for indiceface in facing:
-        palabra+=name[indice3]
-        if palabra == indiceface:
-          longitudactual = number[indice3+len(palabra)]
+    while number2 <= number2+5 :
+      for punto_cardinal in puntos_cardinales:
+        palabra+=name[number2]
+        if palabra == punto_cardinal:
+          longitudactual = number[number2+len(palabra)]
           if name[len(longitudactual)+1]==")":
-            sintaxis = True
-      indice3+=1
+            forma = True
+      number2+=1
   longitud = len(longitudactual+1)
-  tupla =(longitud,sintaxis)
-  return tupla
+  retorno =(longitud,forma)
+  return retorno
 
-def isValid(lineas:str, indice:int):
-  pass
+def isValid(name, number):
 
-def canwalkmultiple(lineas:str, indice:int):
-  indice2= indice
+  forma = False
+  palabra =""
+  number2 = number+1
+  if name[number+1]=="(":
+    while number2 <= number2+5 :
+      for metodo in metodos:
+        palabra+=name[number2]
+        if palabra == metodo:
+          longitudactual = number[number2+len(palabra)]
+          if name[len(longitudactual)+1]==")":
+            forma = True
+      number2+=1
+  longitud = len(longitudactual+1)
+  retorno =(longitud,forma)
+  return retorno
+
+def canwalkmultiple(name, number):
   sintaxis = False
   palabra =""
   palabra2=""
-  indice3 = indice2+1
-  if lineas[indice2+1]=="(":
-    while indice3 <= indice3+5 :
+  number2 = number+1
+  if name[number+1]=="(":
+    while number2 <= number2+5 :
       for indicewalk in walk:
-        palabra+=lineas[indice3]
+        palabra+=name[number2]
         if palabra == indicewalk:
-          longitudactual = lineas[indice3+len(palabra)]
-          if lineas[len(longitudactual)+1]==",":
-            longitudactual_2+=1
-            while longitudactual_2<=longitudactual+1:
-              palabra2+=lineas[longitudactual]
+          longitudactual = name[number2+len(palabra)]
+          if name[len(longitudactual)+1]==",":
+            longitudactual3+=1
+            while longitudactual3<=longitudactual+1:
+              palabra2+=name[longitudactual]
               for indicevar in variables:
                 for indicepar in parametros:
                   if palabra2 == indicepar or palabra2 == indicevar or palabra2.isdigit() == True:
-                    longitudactual3 = lineas[longitudactual+len(palabra2)]
-                    if lineas[len(longitudactual3)+1]==")":
+                    longitudactual3 = name[longitudactual+len(palabra2)]
+                    if name[len(longitudactual3)+1]==")":
                       sintaxis = True
-              longitudactual_2+=1          
-      indice3+=1
+              longitudactual3+=1          
+      number2+=1
   longitud = len(longitudactual3+1)
-  tupla =(longitud,sintaxis)
-  return tupla
+  retorno =(longitud,sintaxis)
+  return retorno
 
 def c_not(name,number):
   if name[number+1] == "(":
@@ -557,11 +642,9 @@ def verificacion(verificar,lista):
         elif verificar[contador] == 'jump':
             retorno = jump(verificar, contador)
             lista.append(retorno)
-            """
         elif verificar[contador] == 'jumpTo':
             retorno = jumpTo(verificar, contador)
             lista.append(retorno)
-            """
         elif verificar[contador] == 'veer':
             retorno = veer(verificar, contador)
             lista.append(retorno)
@@ -580,11 +663,9 @@ def verificacion(verificar,lista):
         elif verificar[contador] == 'free':
             retorno = free(verificar, contador)
             lista.append(retorno)
-            """
         elif verificar[contador] == 'pop':
             retorno = pop(verificar, contador)
             lista.append(retorno)
-            """
         elif verificar[contador] == 'walk_d':
             retorno = walk_d(verificar, contador)
             lista.append(retorno)
@@ -596,6 +677,7 @@ def verificacion(verificar,lista):
         contador += 1
     return lista
     
+#Estructuras de control
 def if_condicional(name, number):
 
     result = 0
